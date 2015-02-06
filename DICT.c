@@ -14,10 +14,10 @@ typedef struct {
 int levenshtein(char *s1, char *s2);         // find levenshtein distance
 int isStringAlpha(char input[]);             // returns 0 if string contains any numeric value otherwise returns 1
 int search(char input[]);                    // returns the meaning of the input word
-void stringCaseChanger(char input[]);        // returns string with first letter uppercase and others lowercase
+void stringToLower(char input[]);        // changes whole string case to lower
 int checkSpace(char input[]);                // returns 0 if any space character is found in the input string
 void suggest(char input[]);                // suggest closest strings
-
+void updateDatabase(void);
 
 
 
@@ -29,7 +29,8 @@ int main( void ) {
 
     while(1 > 0) {
         system("color 3B");
-        puts("1. To find the meaning of word.  2. To exit");
+        puts("---------------------------------------");
+        puts("1. To find the meaning of word\n2. To add a new word to database\n3. To exit");
         printf("\n>>> "); // just for UI
         scanf("%d", &selection);
 
@@ -48,7 +49,7 @@ int main( void ) {
                 }
                } while ((isStringAlpha(input) != 1) || (checkSpace(input) == 0));
 
-               stringCaseChanger(input); // changes the case of input string
+               stringToLower(input); // changes the case of input string
 
                if (strlen(input) == 1) {
                    puts("This is an alphabet.");
@@ -63,6 +64,9 @@ int main( void ) {
                }
                break;
         case 2:
+            updateDatabase();
+            break;
+        case 3:
             exit(0);
             break;
         default:
@@ -99,6 +103,7 @@ int search(char input[]) {
     }
     while(!feof(fp)) {
         fscanf(fp, "%s  ", word);  // read the word
+        stringToLower(word);
         fgets(meaning, 10000, fp); // read its meaning
         if (strcmp(input, word) == 0) {
             printf("\n");
@@ -107,13 +112,14 @@ int search(char input[]) {
             break;
         }
     }
+    fclose(fp);
     return flag;
 }
 
-void stringCaseChanger(char input[]) {
+void stringToLower(char input[]) {
     int i = 0;
-    input[0] = toupper(input[0]); // capitalizing first letter of string
-    for (i = 1; i < strlen(input); i++) {
+    //input[0] = toupper(input[0]); // capitalizing first letter of string
+    for (i = 0; i < strlen(input); i++) {
         input[i] = tolower(input[i]);
     }
 }
@@ -139,6 +145,7 @@ void suggest(char input[]) {
     }
     while(!feof(fp)) {
         fscanf(fp, "%s\n", word);
+        stringToLower(word);
         if (word[0] == input[0]) {
             if ((levenshtein(word, input)) <= 2) {
                 if (count <= 5) {
@@ -184,7 +191,7 @@ void suggest(char input[]) {
     } else {
         puts("Sorry!! Word not found in dictionary.");
     }
-
+    fclose(fp);
 }
 
 
@@ -207,6 +214,31 @@ int levenshtein(char *s1, char *s2) {
     return(column[s1len]);
 }
 
+void updateDatabase(void) {
+    FILE *fp = fopen("wordmeanings.txt", "a");
+    FILE *fp1 = fopen("predict.txt", "a");
+    if (!fp || !fp1) {
+        printf("Error opening database files.\n");
+    }
+    char word[150], meaning[10000];
+    printf("\nEnter the word : ");scanf("%s", word);
+    do {
+        if (checkSpace(word) == 0) {
+            printf("INVALID INPUT\n\nPlease enter a word without spaces : ");
+            scanf("%s", word);
+        }
+    } while (checkSpace(word) == 0);
+    fflush(stdin);
+    printf("Enter its meaning : ");
+    gets(meaning);
+    fprintf(fp, "\n%s  %s\n", word, meaning);
+    fprintf(fp1, "\n%s");
+
+    printf("\nDatabase successfully updated.\n");
+
+    fclose(fp);
+    fclose(fp1);
+}
 
 
 
