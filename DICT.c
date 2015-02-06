@@ -22,11 +22,13 @@ void suggest(char input[]);                // suggest closest strings
 
 
 int main( void ) {
+
     int i = 0, flag = 0, selection = 0;
     char input[150];
 
 
     while(1 > 0) {
+        system("color 3B");
         puts("1. To find the meaning of word.  2. To exit");
         printf("\n>>> "); // just for UI
         scanf("%d", &selection);
@@ -126,6 +128,7 @@ int checkSpace(char input[]) {
 }
 
 void suggest(char input[]) {
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 244);
     int count = 0, f = -1, i = 0, selection = 0;
     char word[150];
     String suggestedWord[6]; // array of structure "String"
