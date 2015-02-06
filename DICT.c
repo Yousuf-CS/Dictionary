@@ -1,7 +1,8 @@
 #include<stdio.h>
-#pragma pack(5)
+#pragma pack(6)
 #include<string.h>
 #include<ctype.h>
+#include<windows.h>
 #define MIN3(a, b, c) ((a) < (b) ? ((a) < (c) ? (a) : (c)) : ((b) < (c) ? (b) : (c)))
 
 typedef struct {
@@ -60,10 +61,10 @@ int main( void ) {
                }
                break;
         case 2:
-            return -1;
+            exit(0);
             break;
         default:
-            puts("Please select only 1 or 2");
+            puts("\nPlease select only 1 or 2\n");
         }
     }
 
@@ -90,6 +91,10 @@ int search(char input[]) {
     int flag = 0;
     char word[150], meaning[10000];
     FILE *fp = fopen("wordmeanings.txt", "r");
+    if (!fp) {
+        puts("Error opening wordmeanings.txt..! Program will now terminate..");
+        exit(0);
+    }
     while(!feof(fp)) {
         fscanf(fp, "%s  ", word);  // read the word
         fgets(meaning, 10000, fp); // read its meaning
@@ -121,15 +126,19 @@ int checkSpace(char input[]) {
 }
 
 void suggest(char input[]) {
-    int count = 0, f = 0, i = 0, selection = 0;
+    int count = 0, f = -1, i = 0, selection = 0;
     char word[150];
-    String suggestedWord[5]; // array of structure "String"
+    String suggestedWord[6]; // array of structure "String"
     FILE *fp = fopen("predict.txt", "r");
+    if (!fp) {
+        puts("Error opening predict.txt..! Program will now terminate..");
+        exit(0);
+    }
     while(!feof(fp)) {
         fscanf(fp, "%s\n", word);
         if (word[0] == input[0]) {
-            if (levenshtein(word, input) <= 2) {
-                if (count <= 4) {
+            if ((levenshtein(word, input)) <= 2) {
+                if (count <= 5) {
                     strcpy(suggestedWord[count].string, word);
                     f = count;
                 }
@@ -139,33 +148,40 @@ void suggest(char input[]) {
             continue;
         }
     } //  end while
+    if (f != -1) {
+        printf("\nDid you mean :  ");
+        for (i = 0; i <= f; i++) {
+            printf("%d.%s  ", (i+1), suggestedWord[i].string);
+        }
+        printf("\n\n"); // just for UI
+        printf("Enter the adjacent number to find the meaning :  ");
+        selection = getchar();
+        switch(selection) {
+        case '1':
+            search(suggestedWord[0].string);
+            break;
+        case '2':
+            search(suggestedWord[1].string);
+            break;
+        case '3':
+            search(suggestedWord[2].string);
+            break;
+        case '4':
+            search(suggestedWord[3].string);
+            break;
+        case '5':
+            search(suggestedWord[4].string);
+            break;
+        case '6':
+            search(suggestedWord[5].string);
+            break;
+        default:
+            puts("Please enter the correct number.");
+        }
+    } else {
+        puts("Sorry!! Word not found in dictionary.");
+    }
 
-    printf("\nDid you mean :  ");
-    for (i = 0; i <= f; i++) {
-        printf("%d.%s  ", (i+1), suggestedWord[i].string);
-    }
-    printf("\n\n"); // just for UI
-    printf("Enter the adjacent number to find the meaning :  ");
-    selection = getchar();
-    switch(selection) {
-    case '1':
-        search(suggestedWord[0].string);
-        break;
-    case '2':
-        search(suggestedWord[1].string);
-        break;
-    case '3':
-        search(suggestedWord[2].string);
-        break;
-    case '4':
-        search(suggestedWord[3].string);
-        break;
-    case '5':
-        search(suggestedWord[4].string);
-        break;
-    default:
-        puts("Please enter the correct number.");
-    }
 }
 
 
